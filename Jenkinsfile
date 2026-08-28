@@ -1,6 +1,4 @@
-// Walking skeleton pipeline: checkout -> build+test -> image -> local registry -> local deploy.
-// No quality gates yet (JaCoCo/Sonar) on purpose - those come once there's real code/tests
-// to make them meaningful. See ../../architecture/ for why this project is sequenced this way.
+// Walking skeleton pipeline: checkout -> build+test -> quality gate -> image -> local registry -> local deploy.
 pipeline {
     agent any
 
@@ -9,6 +7,7 @@ pipeline {
         IMAGE_NAME    = 'catalog'
         CONTAINER_NAME = 'catalog-service'
         HOST_PORT     = '8081'
+        SONAR_HOST_URL = 'http://sonarqube:9000'
     }
 
     stages {
@@ -21,6 +20,14 @@ pipeline {
         stage('Build and Test') {
             steps {
                 sh './mvnw -B clean verify'
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                    sh './mvnw -B sonar:sonar -Dsonar.host.url=${SONAR_HOST_URL} -Dsonar.token=${SONAR_TOKEN}'
+                }
             }
         }
 
