@@ -39,7 +39,7 @@ public class CategoryService implements CategoryUseCase {
     @Transactional
     public void updateCategoryName(Category category) {
         //TODO implement and exposed in controller in private path
-        logger.info("Updating Category with id=", category.id());
+        logger.info("Updating Category with id={}", category.id());
         categoryRepository.updateCategory(category);
         logger.info("Category Updated with id={}", category.id());
     }

@@ -14,7 +14,6 @@ public class CategoryEntity {
     private String name;
 
     protected CategoryEntity(){
-
     }
 
     public CategoryEntity(String name){

@@ -22,14 +22,14 @@ public class CategoryRepositoryAdapter implements CategoryRepository {
     public Category createCategory(String nameCategory) {
         CategoryEntity categoryEntity = CategoryMapper.toToEntity(nameCategory);
         categoryJpaRepository.save(categoryEntity);
-        return CategoryMapper.ToDomain(categoryEntity);
+        return CategoryMapper.toDomain(categoryEntity);
     }
 
     @Override
     public List<Category> getAllCategories() {
         List<CategoryEntity> categoryEntityList = categoryJpaRepository.findAll();
         return categoryEntityList.stream()
-                .map(CategoryMapper::ToDomain)
+                .map(CategoryMapper::toDomain)
                 .toList();
     }
 
