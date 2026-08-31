@@ -2,6 +2,8 @@ package com.virtual.store.catalog.adapter.out.persistence.entity;
 
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
 @Table(name = "product_category")
 public class CategoryEntity {
@@ -12,6 +14,9 @@ public class CategoryEntity {
 
     @Column(nullable = false)
     private String name;
+
+    @OneToMany(mappedBy = "categoryEntity")
+    private List<ProductEntity> productEntitySet;
 
     protected CategoryEntity(){
     }
