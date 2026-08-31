@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ProductService implements ProductUseCase {
     private static final Logger log = LoggerFactory.getLogger(ProductService.class);
-    private final static int PAGE_SIZE=20;
+    private static final int PAGE_SIZE=20;
     private final ProductRepository productRepository;
 
 

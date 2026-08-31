@@ -33,8 +33,7 @@ public class ProductRepositoryAdapter implements ProductRepository {
         CategoryEntity categoryEntity = categoryJpaRepository.getReferenceById(product.idCategory());
         ProductEntity productEntity = ProductMapper.toEntity(product, categoryEntity);
         productJpaRepository.save(productEntity);
-        Product created = ProductMapper.toDomain(productEntity);
-        return created;
+        return ProductMapper.toDomain(productEntity);
     }
 
     @Override

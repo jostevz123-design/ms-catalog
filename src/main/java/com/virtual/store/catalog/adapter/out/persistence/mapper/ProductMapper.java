@@ -6,6 +6,10 @@ import com.virtual.store.catalog.domain.model.Product;
 
 public class ProductMapper {
 
+    private ProductMapper(){
+        //This class should not be instantiated
+    }
+
     public static ProductEntity toEntity(Product product, CategoryEntity categoryEntity){
         return new ProductEntity(product.name(), product.description(), product.brand(), product.isActive(), categoryEntity);
     }
