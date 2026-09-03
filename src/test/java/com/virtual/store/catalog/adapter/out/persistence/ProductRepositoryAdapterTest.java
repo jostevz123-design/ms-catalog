@@ -2,14 +2,19 @@ package com.virtual.store.catalog.adapter.out.persistence;
 
 import com.virtual.store.catalog.adapter.out.persistence.entity.CategoryEntity;
 import com.virtual.store.catalog.adapter.out.persistence.entity.ProductEntity;
+import com.virtual.store.catalog.adapter.out.persistence.entity.ProductImageEntity;
+import com.virtual.store.catalog.adapter.out.persistence.entity.ProductVariantEntity;
 import com.virtual.store.catalog.domain.exception.ResourceNotFoundException;
 import com.virtual.store.catalog.domain.model.PagedResult;
 import com.virtual.store.catalog.domain.model.Product;
+import com.virtual.store.catalog.domain.model.ProductCatalogItem;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
 import org.springframework.context.annotation.Import;
+
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -46,34 +51,68 @@ class ProductRepositoryAdapterTest {
     }
 
     @Test
-    void getAllProducts_returnsPagedResultAcrossCategories() {
-        CategoryEntity clothing = entityManager.persistFlushFind(new CategoryEntity("Clothing"));
-        CategoryEntity electronics = entityManager.persistFlushFind(new CategoryEntity("Electronics"));
-        entityManager.persist(new ProductEntity("T-Shirt", "Cotton shirt", "Nike", true, clothing));
-        entityManager.persist(new ProductEntity("Headphones", "Wireless", "Sony", true, electronics));
+    void getAllProducts_returnsMinPriceAcrossVariantsAndPrimaryImage() {
+        CategoryEntity category = entityManager.persistFlushFind(new CategoryEntity("Clothing"));
+        ProductEntity product = entityManager.persistFlushFind(
+                new ProductEntity("T-Shirt", "Cotton shirt", "Nike", true, category));
+        entityManager.persist(new ProductVariantEntity("SKU-BLUE", Map.of("color", "blue"), 5000L, 10L, product));
+        entityManager.persist(new ProductVariantEntity("SKU-RED", Map.of("color", "red"), 4500L, 5L, product));
+        entityManager.persist(new ProductImageEntity("http://img/primary.jpg", true, product, null));
+        entityManager.persist(new ProductImageEntity("http://img/secondary.jpg", false, product, null));
         entityManager.flush();
 
-        PagedResult<Product> result = productRepositoryAdapter.getAllProducts(0, 20);
+        PagedResult<ProductCatalogItem> result = productRepositoryAdapter.getAllProducts(0, 20);
 
-        assertThat(result.content()).hasSize(2);
-        assertThat(result.totalElements()).isEqualTo(2);
-        assertThat(result.page()).isZero();
+        assertThat(result.content()).hasSize(1);
+        ProductCatalogItem item = result.content().get(0);
+        assertThat(item.name()).isEqualTo("T-Shirt");
+        assertThat(item.price()).isEqualTo(4500L);
+        assertThat(item.imageUrl()).isEqualTo("http://img/primary.jpg");
     }
 
     @Test
-    void getProductsByCategoryId_returnsOnlyProductsInThatCategory() {
-        CategoryEntity clothing = entityManager.persistFlushFind(new CategoryEntity("Clothing"));
-        CategoryEntity electronics = entityManager.persistFlushFind(new CategoryEntity("Electronics"));
-        entityManager.persist(new ProductEntity("T-Shirt", "Cotton shirt", "Nike", true, clothing));
-        entityManager.persist(new ProductEntity("Headphones", "Wireless", "Sony", true, electronics));
+    void getAllProducts_excludesProductsWithoutAnyVariant() {
+        CategoryEntity category = entityManager.persistFlushFind(new CategoryEntity("Clothing"));
+        entityManager.persistFlushFind(new ProductEntity("No Variant Product", "desc", "Brand", true, category));
+
+        PagedResult<ProductCatalogItem> result = productRepositoryAdapter.getAllProducts(0, 20);
+
+        assertThat(result.content()).isEmpty();
+    }
+
+    @Test
+    void getAllProducts_returnsNullImageUrl_whenNoPrimaryImageExists() {
+        CategoryEntity category = entityManager.persistFlushFind(new CategoryEntity("Clothing"));
+        ProductEntity product = entityManager.persistFlushFind(
+                new ProductEntity("T-Shirt", "Cotton shirt", "Nike", true, category));
+        entityManager.persist(new ProductVariantEntity("SKU-BLUE", Map.of("color", "blue"), 5000L, 10L, product));
         entityManager.flush();
 
-        PagedResult<Product> result = productRepositoryAdapter.getProductsByCategoryId(clothing.getId(), 0, 20);
+        PagedResult<ProductCatalogItem> result = productRepositoryAdapter.getAllProducts(0, 20);
+
+        assertThat(result.content()).hasSize(1);
+        assertThat(result.content().get(0).imageUrl()).isNull();
+    }
+
+    @Test
+    void getProductsByCategoryId_returnsOnlyProductsInThatCategoryWithPrice() {
+        CategoryEntity clothing = entityManager.persistFlushFind(new CategoryEntity("Clothing"));
+        CategoryEntity electronics = entityManager.persistFlushFind(new CategoryEntity("Electronics"));
+        ProductEntity shirt = entityManager.persistFlushFind(
+                new ProductEntity("T-Shirt", "Cotton shirt", "Nike", true, clothing));
+        ProductEntity headphones = entityManager.persistFlushFind(
+                new ProductEntity("Headphones", "Wireless", "Sony", true, electronics));
+        entityManager.persist(new ProductVariantEntity("SKU-SHIRT", Map.of("color", "blue"), 3000L, 10L, shirt));
+        entityManager.persist(new ProductVariantEntity("SKU-HEADPHONES", Map.of("color", "black"), 8000L, 10L, headphones));
+        entityManager.flush();
+
+        PagedResult<ProductCatalogItem> result = productRepositoryAdapter.getProductsByCategoryId(clothing.getId(), 0, 20);
 
         assertThat(result.content())
                 .hasSize(1)
-                .extracting(Product::name)
+                .extracting(ProductCatalogItem::name)
                 .containsExactly("T-Shirt");
+        assertThat(result.content().get(0).price()).isEqualTo(3000L);
     }
 
     @Test

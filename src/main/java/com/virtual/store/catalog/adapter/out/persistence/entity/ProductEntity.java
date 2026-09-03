@@ -2,6 +2,9 @@ package com.virtual.store.catalog.adapter.out.persistence.entity;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "product_catalog")
 public class ProductEntity {
@@ -26,6 +29,11 @@ public class ProductEntity {
     @JoinColumn(name = "id_category", nullable = false)
     private CategoryEntity categoryEntity;
 
+    @OneToMany(mappedBy = "productEntity")
+    private List<ProductVariantEntity> productVariantEntityList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "productEntity")
+    private List<ProductImageEntity> productImageEntityList = new ArrayList<>();
 
     protected ProductEntity(){
 
@@ -80,5 +88,21 @@ public class ProductEntity {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public void addProductVariantEntity(ProductVariantEntity productVariantEntity){
+        this.productVariantEntityList.add(productVariantEntity);
+    }
+
+    public List<ProductVariantEntity> getProductVariantEntityList(){
+        return productVariantEntityList;
+    }
+
+    public void addProductImageEntity(ProductImageEntity productImageEntity){
+        this.productImageEntityList.add(productImageEntity);
+    }
+
+    public List<ProductImageEntity> getProductImageEntityList(){
+        return productImageEntityList;
     }
 }

@@ -3,6 +3,7 @@ package com.virtual.store.catalog.application.service;
 import com.virtual.store.catalog.application.port.out.ProductRepository;
 import com.virtual.store.catalog.domain.model.PagedResult;
 import com.virtual.store.catalog.domain.model.Product;
+import com.virtual.store.catalog.domain.model.ProductCatalogItem;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -48,10 +49,10 @@ class ProductServiceTest {
 
     @Test
     void getAllProducts_delegatesToRepositoryWithDefaultPageSize() {
-        PagedResult<Product> page = new PagedResult<>(List.of(), 0, PAGE_SIZE, 0, 0);
+        PagedResult<ProductCatalogItem> page = new PagedResult<>(List.of(), 0, PAGE_SIZE, 0, 0);
         when(productRepository.getAllProducts(0, PAGE_SIZE)).thenReturn(page);
 
-        PagedResult<Product> result = productService.getAllProducts(0);
+        PagedResult<ProductCatalogItem> result = productService.getAllProducts(0);
 
         assertThat(result).isEqualTo(page);
         verify(productRepository).getAllProducts(0, PAGE_SIZE);
@@ -59,10 +60,10 @@ class ProductServiceTest {
 
     @Test
     void getProductsByCategoryId_delegatesToRepositoryWithDefaultPageSize() {
-        PagedResult<Product> page = new PagedResult<>(List.of(), 0, PAGE_SIZE, 0, 0);
+        PagedResult<ProductCatalogItem> page = new PagedResult<>(List.of(), 0, PAGE_SIZE, 0, 0);
         when(productRepository.getProductsByCategoryId(5L, 0, PAGE_SIZE)).thenReturn(page);
 
-        PagedResult<Product> result = productService.getProductsByCategoryId(5L, 0);
+        PagedResult<ProductCatalogItem> result = productService.getProductsByCategoryId(5L, 0);
 
         assertThat(result).isEqualTo(page);
         verify(productRepository).getProductsByCategoryId(5L, 0, PAGE_SIZE);

@@ -4,6 +4,7 @@ import com.virtual.store.catalog.application.port.in.ProductUseCase;
 import com.virtual.store.catalog.application.port.out.ProductRepository;
 import com.virtual.store.catalog.domain.model.PagedResult;
 import com.virtual.store.catalog.domain.model.Product;
+import com.virtual.store.catalog.domain.model.ProductCatalogItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -32,13 +33,13 @@ public class ProductService implements ProductUseCase {
 
     @Override
     @Transactional(readOnly = true)
-    public PagedResult<Product> getAllProducts(int pageNumber) {
+    public PagedResult<ProductCatalogItem> getAllProducts(int pageNumber) {
         return productRepository.getAllProducts(pageNumber,PAGE_SIZE);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public PagedResult<Product> getProductsByCategoryId(Long categoryId, int pageNumber) {
+    public PagedResult<ProductCatalogItem> getProductsByCategoryId(Long categoryId, int pageNumber) {
         return productRepository.getProductsByCategoryId(categoryId, pageNumber, PAGE_SIZE);
     }
 
