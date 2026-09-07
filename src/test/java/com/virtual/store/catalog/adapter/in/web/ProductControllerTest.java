@@ -77,7 +77,7 @@ class ProductControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.name").value("T-Shirt"))
-                .andExpect(jsonPath("$.generalImagersUrls[0]").value("http://img/general.jpg"))
+                .andExpect(jsonPath("$.generalImageUrls[0]").value("http://img/general.jpg"))
                 .andExpect(jsonPath("$.productVariants.length()").value(1))
                 .andExpect(jsonPath("$.productVariants[0].sku").value("SKU-BLUE"))
                 .andExpect(jsonPath("$.productVariants[0].imageUrls[0]").value("http://img/blue.jpg"));
