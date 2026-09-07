@@ -84,4 +84,12 @@ public class ProductImageRepositoryAdapter implements ProductImageRepository {
         productImageEntity.setUrlImage(productImage.url());
         productImageEntity.setPrimary(productImage.isPrimary());
     }
+
+    @Override
+    public List<ProductImage> getPrimaryImageUrlsByProductIds(List<Long> productIds) {
+        List<ProductImageEntity> productImageList = productImageJpaRepository.findByProductEntityIdInAndIsPrimaryTrue(productIds);
+        return productImageList.stream()
+                .map(ProductImageMapper::toDomain)
+                .toList();
+    }
 }

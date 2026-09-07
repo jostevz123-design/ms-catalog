@@ -2,11 +2,11 @@ package com.virtual.store.catalog.adapter.out.persistence;
 
 import com.virtual.store.catalog.adapter.out.persistence.entity.CategoryEntity;
 import com.virtual.store.catalog.adapter.out.persistence.entity.ProductEntity;
-import com.virtual.store.catalog.adapter.out.persistence.entity.ProductImageEntity;
 import com.virtual.store.catalog.adapter.out.persistence.mapper.ProductCatalogMapper;
 import com.virtual.store.catalog.adapter.out.persistence.mapper.ProductMapper;
 import com.virtual.store.catalog.adapter.out.persistence.projection.ProductCatalogProjection;
 import com.virtual.store.catalog.application.port.out.ProductRepository;
+import com.virtual.store.catalog.application.port.out.ProductVariantRepository;
 import com.virtual.store.catalog.domain.exception.ResourceNotFoundException;
 import com.virtual.store.catalog.domain.model.PagedResult;
 import com.virtual.store.catalog.domain.model.Product;
@@ -17,20 +17,16 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Repository
 public class ProductRepositoryAdapter implements ProductRepository {
 
     private final ProductJpaRepository productJpaRepository;
     private final CategoryJpaRepository categoryJpaRepository;
-    private final ProductImageJpaRepository productImageJpaRepository;
 
-    public ProductRepositoryAdapter(ProductJpaRepository productJpaRepository, CategoryJpaRepository categoryJpaRepository, ProductImageJpaRepository productImageJpaRepository){
+    public ProductRepositoryAdapter(ProductJpaRepository productJpaRepository, CategoryJpaRepository categoryJpaRepository){
         this.productJpaRepository = productJpaRepository;
         this.categoryJpaRepository = categoryJpaRepository;
-        this.productImageJpaRepository = productImageJpaRepository;
     }
 
     @Override
@@ -79,20 +75,20 @@ public class ProductRepositoryAdapter implements ProductRepository {
         productEntity.setActive(active);
     }
 
+    @Override
+    public Product getProductById(Long productId) {
+        ProductEntity productEntity = productJpaRepository.findById(productId)
+                .orElseThrow(()-> new ResourceNotFoundException(" Product with id=" + productId + " doesn not exist"));
+
+
+        return ProductMapper.toDomain(productEntity);
+    }
+
     private PagedResult<ProductCatalogItem> toPagedProductCatalogItem(Page<ProductCatalogProjection> productCatalogPage){
-        List<Long> productsIds = productCatalogPage.getContent().stream()
-                        .map(ProductCatalogProjection::getId)
-                                .toList();
-        List<ProductImageEntity> productImageEntityList = productImageJpaRepository.findByProductEntityIdInAndIsPrimaryTrue(productsIds);
-        Map<Long, String> productImagesUrlMap = productImageEntityList.stream()
-                .collect(Collectors.toMap(
-                        item -> item.getProductEntity().getId(),
-                        ProductImageEntity::getUrlImage
-                ));
 
 
         List<ProductCatalogItem> productCatalogItemList = productCatalogPage.getContent().stream()
-                .map( catalogItem -> ProductCatalogMapper.toDomain(catalogItem, productImagesUrlMap.get(catalogItem.getId())))
+                .map( ProductCatalogMapper::toDomain)
                 .toList();
 
 

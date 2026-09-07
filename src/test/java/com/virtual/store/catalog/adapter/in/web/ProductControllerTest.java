@@ -2,7 +2,11 @@ package com.virtual.store.catalog.adapter.in.web;
 
 import com.virtual.store.catalog.application.port.in.ProductUseCase;
 import com.virtual.store.catalog.domain.model.PagedResult;
+import com.virtual.store.catalog.domain.model.Product;
 import com.virtual.store.catalog.domain.model.ProductCatalogItem;
+import com.virtual.store.catalog.domain.model.ProductDetail;
+import com.virtual.store.catalog.domain.model.ProductImage;
+import com.virtual.store.catalog.domain.model.ProductVariant;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -56,5 +60,26 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$.content.length()").value(1))
                 .andExpect(jsonPath("$.content[0].name").value("T-Shirt"))
                 .andExpect(jsonPath("$.content[0].price").value(3000));
+    }
+
+    @Test
+    void getProductDetail_returns200WithVariantsAndImages() throws Exception {
+        Product product = new Product(1L, "T-Shirt", "Cotton shirt", "Nike", true, 5L);
+        ProductVariant variant = new ProductVariant(10L, 1L, "SKU-BLUE", java.util.Map.of("color", "blue"), 5000L, 10L);
+        List<ProductImage> images = List.of(
+                new ProductImage(100L, 1L, 10L, "http://img/blue.jpg", true),
+                new ProductImage(101L, 1L, null, "http://img/general.jpg", true)
+        );
+        ProductDetail detail = new ProductDetail(product, List.of(variant), images);
+        when(productUseCase.getProductDetailByProductId(1L)).thenReturn(detail);
+
+        mockMvc.perform(get("/api/v1/products/detail/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.name").value("T-Shirt"))
+                .andExpect(jsonPath("$.generalImagersUrls[0]").value("http://img/general.jpg"))
+                .andExpect(jsonPath("$.productVariants.length()").value(1))
+                .andExpect(jsonPath("$.productVariants[0].sku").value("SKU-BLUE"))
+                .andExpect(jsonPath("$.productVariants[0].imageUrls[0]").value("http://img/blue.jpg"));
     }
 }

@@ -2,9 +2,11 @@ package com.virtual.store.catalog.adapter.in.web;
 
 import com.virtual.store.catalog.adapter.in.web.dto.PageResultResponse;
 import com.virtual.store.catalog.adapter.in.web.dto.ProductCatalogResponse;
+import com.virtual.store.catalog.adapter.in.web.dto.ProductDetailResponse;
 import com.virtual.store.catalog.application.port.in.ProductUseCase;
 import com.virtual.store.catalog.domain.model.PagedResult;
 import com.virtual.store.catalog.domain.model.ProductCatalogItem;
+import com.virtual.store.catalog.domain.model.ProductDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,8 +26,7 @@ public class ProductController {
     @GetMapping("/page/{pageNumber}")
     public ResponseEntity<PageResultResponse<ProductCatalogResponse>> getAllProducts(@PathVariable("pageNumber") int pageNumber){
         PagedResult<ProductCatalogItem> productPagedResult = productUseCase.getAllProducts(pageNumber);
-        List<ProductCatalogResponse> productResponseList = productPagedResult.content().stream()
-                    .map(ProductCatalogResponse::from)
+        List<ProductCatalogResponse> productResponseList = productPagedResult.content().stream()                    .map(ProductCatalogResponse::from)
                 .toList();
 
         PageResultResponse<ProductCatalogResponse> pagedResult = new PageResultResponse(
@@ -53,5 +54,14 @@ public class ProductController {
                 productPagedResult.totalPages()
         );
         return ResponseEntity.ok(pagedResult);
+
+    }
+
+    @GetMapping("/detail/{productId}")
+    public ResponseEntity<ProductDetailResponse> GetProductdetail(@PathVariable("productId") Long productId){
+        ProductDetail productDetail = productUseCase.getProductDetailByProductId(productId);
+        ProductDetailResponse response  = ProductDetailResponse.from(productDetail);
+
+        return ResponseEntity.ok(response);
     }
 }

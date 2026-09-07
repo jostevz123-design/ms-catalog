@@ -10,4 +10,5 @@ public interface ProductImageRepository {
     List<ProductImage> getProductImageByProductVariantId(Long productVariantId);
     void deleteProductImage(Long idProductImage);
     void updateProductImage(ProductImage productImage);
+    List<ProductImage> getPrimaryImageUrlsByProductIds(List<Long> productIds);
 }

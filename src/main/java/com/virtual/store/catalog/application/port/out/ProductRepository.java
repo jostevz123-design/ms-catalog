@@ -10,4 +10,5 @@ public interface ProductRepository {
     PagedResult<ProductCatalogItem> getProductsByCategoryId(Long categoryId, int pageNumber, int pageSize);
     void updateProduct(Product product);
     void changeActiveStatus(Long productId,boolean active);
+    Product getProductById(Long productId);
 }

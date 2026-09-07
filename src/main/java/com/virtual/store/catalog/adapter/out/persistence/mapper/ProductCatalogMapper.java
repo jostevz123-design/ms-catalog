@@ -9,13 +9,13 @@ public class ProductCatalogMapper {
         //This class should not be instantiated
     }
 
-    public static ProductCatalogItem toDomain(ProductCatalogProjection productCatalogProjection, String imageUrl){
+    public static ProductCatalogItem toDomain(ProductCatalogProjection productCatalogProjection){
         return new ProductCatalogItem(
                 productCatalogProjection.getId(),
                 productCatalogProjection.getName(),
                 productCatalogProjection.getBrand(),
                 productCatalogProjection.getMinPrice(),
-                imageUrl
+                null
         );
     }
 }

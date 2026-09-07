@@ -51,14 +51,12 @@ class ProductRepositoryAdapterTest {
     }
 
     @Test
-    void getAllProducts_returnsMinPriceAcrossVariantsAndPrimaryImage() {
+    void getAllProducts_returnsMinPriceAcrossVariants() {
         CategoryEntity category = entityManager.persistFlushFind(new CategoryEntity("Clothing"));
         ProductEntity product = entityManager.persistFlushFind(
                 new ProductEntity("T-Shirt", "Cotton shirt", "Nike", true, category));
         entityManager.persist(new ProductVariantEntity("SKU-BLUE", Map.of("color", "blue"), 5000L, 10L, product));
         entityManager.persist(new ProductVariantEntity("SKU-RED", Map.of("color", "red"), 4500L, 5L, product));
-        entityManager.persist(new ProductImageEntity("http://img/primary.jpg", true, product, null));
-        entityManager.persist(new ProductImageEntity("http://img/secondary.jpg", false, product, null));
         entityManager.flush();
 
         PagedResult<ProductCatalogItem> result = productRepositoryAdapter.getAllProducts(0, 20);
@@ -67,7 +65,21 @@ class ProductRepositoryAdapterTest {
         ProductCatalogItem item = result.content().get(0);
         assertThat(item.name()).isEqualTo("T-Shirt");
         assertThat(item.price()).isEqualTo(4500L);
-        assertThat(item.imageUrl()).isEqualTo("http://img/primary.jpg");
+    }
+
+    @Test
+    void getAllProducts_alwaysReturnsNullImageUrl_becauseImageResolutionIsAServiceConcern() {
+        CategoryEntity category = entityManager.persistFlushFind(new CategoryEntity("Clothing"));
+        ProductEntity product = entityManager.persistFlushFind(
+                new ProductEntity("T-Shirt", "Cotton shirt", "Nike", true, category));
+        entityManager.persist(new ProductVariantEntity("SKU-BLUE", Map.of("color", "blue"), 5000L, 10L, product));
+        entityManager.persist(new ProductImageEntity("http://img/primary.jpg", true, product, null));
+        entityManager.flush();
+
+        PagedResult<ProductCatalogItem> result = productRepositoryAdapter.getAllProducts(0, 20);
+
+        assertThat(result.content()).hasSize(1);
+        assertThat(result.content().get(0).imageUrl()).isNull();
     }
 
     @Test
@@ -78,20 +90,6 @@ class ProductRepositoryAdapterTest {
         PagedResult<ProductCatalogItem> result = productRepositoryAdapter.getAllProducts(0, 20);
 
         assertThat(result.content()).isEmpty();
-    }
-
-    @Test
-    void getAllProducts_returnsNullImageUrl_whenNoPrimaryImageExists() {
-        CategoryEntity category = entityManager.persistFlushFind(new CategoryEntity("Clothing"));
-        ProductEntity product = entityManager.persistFlushFind(
-                new ProductEntity("T-Shirt", "Cotton shirt", "Nike", true, category));
-        entityManager.persist(new ProductVariantEntity("SKU-BLUE", Map.of("color", "blue"), 5000L, 10L, product));
-        entityManager.flush();
-
-        PagedResult<ProductCatalogItem> result = productRepositoryAdapter.getAllProducts(0, 20);
-
-        assertThat(result.content()).hasSize(1);
-        assertThat(result.content().get(0).imageUrl()).isNull();
     }
 
     @Test

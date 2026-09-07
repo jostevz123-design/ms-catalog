@@ -3,6 +3,8 @@ package com.virtual.store.catalog.adapter.out.persistence.mapper;
 import com.virtual.store.catalog.adapter.out.persistence.entity.CategoryEntity;
 import com.virtual.store.catalog.adapter.out.persistence.entity.ProductEntity;
 import com.virtual.store.catalog.domain.model.Product;
+import com.virtual.store.catalog.domain.model.ProductImage;
+import com.virtual.store.catalog.domain.model.ProductVariant;
 
 public class ProductMapper {
 
@@ -15,6 +17,12 @@ public class ProductMapper {
     }
 
     public static Product toDomain(ProductEntity productEntity){
-        return new Product(productEntity.getId(), productEntity.getName(), productEntity.getDescription(), productEntity.getBrand(), productEntity.isActive(), productEntity.getCategoryEntity().getId());
+        return new Product(
+                productEntity.getId(),
+                productEntity.getName(),
+                productEntity.getDescription(),
+                productEntity.getBrand(),
+                productEntity.isActive(),
+                productEntity.getCategoryEntity().getId());
     }
 }
